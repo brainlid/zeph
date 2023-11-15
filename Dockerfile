@@ -116,10 +116,11 @@ ENV MIX_ENV="prod"
 ENV XLA_TARGET="cuda120"
 ENV BUMBLEBEE_CACHE_DIR="/data/cache/bumblebee"
 ENV XLA_CACHE_DIR="/data/cache/xla"
+ENV ELIXIR_ERL_OPTIONS = "-proto_dist inet6_tcp +sssdio 128"
+ENV XLA_TARGET="cuda120" # Need to set it here too I believe
 
 # Only copy the final release from the build stage
 COPY --from=builder /app/_build/${MIX_ENV}/rel/zeph ./
-# COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/zeph ./
 
 # USER nobody
 
