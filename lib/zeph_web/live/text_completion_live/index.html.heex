@@ -1,0 +1,28 @@
+<.header>
+  Text Completion Testing
+</.header>
+
+<div>
+  <.simple_form for={@form} id="new-message-form" phx-change="validate" phx-submit="save">
+    <.input
+      field={@form[:content]}
+      id="new-message-content"
+      type="textarea"
+      rows={8}
+      label="Send Message"
+      phx-hook="CtrlEnterSubmits"
+      phx-debounce="500"
+    />
+    <:actions>
+      <.button phx-disable-with="Submiting...">Submit</.button>
+    </:actions>
+  </.simple_form>
+</div>
+
+<div class="flex gap-x-4">
+  <div class="min-w-0 flex-auto">
+    <span class="whitespace-pre-wrap">
+      <%= @text %>
+    </span>
+  </div>
+</div>
