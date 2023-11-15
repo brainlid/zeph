@@ -18,10 +18,16 @@ defmodule Zeph.Zephyr do
     {:ok, generation_config} =
       Bumblebee.load_generation_config(mistral, spec_module: Bumblebee.Text.Mistral)
 
-    generation_config = Bumblebee.configure(generation_config, max_new_tokens: 500)
+    generation_config =
+      Bumblebee.configure(generation_config,
+        max_new_tokens: 500,
+        strategy: %{type: :multinomial_sampling, top_p: 0.6}
+      )
 
     Bumblebee.Text.generation(model_info, tokenizer, generation_config,
-      defn_options: [compiler: EXLA]
+      compile: [batch_size: 1, sequence_length: 1028],
+      defn_options: [compiler: EXLA, lazy_transfers: :never]
+      # preallocate_params: true
     )
   end
 
