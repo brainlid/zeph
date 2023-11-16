@@ -22,6 +22,29 @@ defmodule ZephWeb.TextCompletionLive.Index do
     {:ok, socket}
   end
 
+  # handles async function returning a successful result
+  def handle_async(:text_completion, {:ok, {:zephyr_result, text, ms}}, socket) do
+    # discard the result of the successful async function. The side-effects are
+    # what we want.
+    socket =
+      socket
+      |> assign(:async_result, AsyncResult.ok(%AsyncResult{}, :ok))
+      |> assign(:text, text)
+      |> put_flash(:info, "Finished in #{ms} msec")
+
+    {:noreply, socket}
+  end
+
+  # handles async function exploding
+  def handle_async(:text_completion, {:exit, reason}, socket) do
+    socket =
+      socket
+      |> put_flash(:error, "Call failed: #{inspect(reason)}")
+      |> assign(:async_result, %AsyncResult{})
+
+    {:noreply, socket}
+  end
+
   @impl true
   # start the async process
   def handle_event("validate", %{"message" => params}, socket) do
@@ -29,39 +52,20 @@ defmodule ZephWeb.TextCompletionLive.Index do
   end
 
   def handle_event("save", %{"message" => %{"content" => content} = _params}, socket) do
-    Logger.info("LiveView submitting text prompt to LLM Server")
-    Zeph.Server.submit_prompt(content)
+    Logger.info("LiveView submitting text prompt to LLM Serving")
 
     socket =
       socket
       |> assign(:async_result, AsyncResult.loading())
       |> assign(:text, "")
+      |> start_async(:text_completion, fn ->
+        {time, result} = :timer.tc(Nx.Serving, :batched_run, [ZephyrModel, content])
+        in_ms = time / 1_000
+        Logger.info("LLM Server: generated response in #{inspect(in_ms)} msec")
+        %{results: [%{text: text}]} = result
 
-    {:noreply, socket}
-  end
-
-  # handles async function returning a successful result
-  def handle_async(:running_task, {:ok, :ok = _success_result}, socket) do
-    # discard the result of the successful async function. The side-effects are
-    # what we want.
-    socket =
-      socket
-      |> put_flash(:info, "Completed!")
-      |> assign(:async_result, AsyncResult.ok(%AsyncResult{}, :ok))
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  # handle receiving a message sent from the async process
-  def handle_info({:zephyr_result, text, ms}, socket) do
-    Logger.info("LiveView received generated text response.")
-
-    socket =
-      socket
-      |> assign(:text, text)
-      |> assign(:async_result, AsyncResult.ok(%AsyncResult{}, :ok))
-      |> put_flash(:info, "Finished in #{ms} msec")
+        {:zephyr_result, text, in_ms}
+      end)
 
     {:noreply, socket}
   end
