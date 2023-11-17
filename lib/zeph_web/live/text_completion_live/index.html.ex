@@ -23,13 +23,13 @@ defmodule ZephWeb.TextCompletionLive.Index do
   end
 
   # handles async function returning a successful result
-  def handle_async(:text_completion, {:ok, {:zephyr_result, text, ms}}, socket) do
+  def handle_async(:text_completion, {:ok, {:zephyr_result, _text, ms}}, socket) do
     # discard the result of the successful async function. The side-effects are
     # what we want.
     socket =
       socket
       |> assign(:async_result, AsyncResult.ok(%AsyncResult{}, :ok))
-      |> assign(:text, text)
+      # |> assign(:text, text)
       |> put_flash(:info, "Finished in #{ms} msec")
 
     {:noreply, socket}
@@ -46,6 +46,15 @@ defmodule ZephWeb.TextCompletionLive.Index do
   end
 
   @impl true
+  def handle_info({:streamed, data}, socket) do
+    socket =
+      socket
+      |> assign(:text, socket.assigns.text <> data)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   # start the async process
   def handle_event("validate", %{"message" => params}, socket) do
     {:noreply, assign_form(socket, params)}
@@ -53,6 +62,7 @@ defmodule ZephWeb.TextCompletionLive.Index do
 
   def handle_event("save", %{"message" => %{"content" => content} = _params}, socket) do
     Logger.info("LiveView submitting text prompt to LLM Serving")
+    lv_pid = self()
 
     socket =
       socket
@@ -60,11 +70,14 @@ defmodule ZephWeb.TextCompletionLive.Index do
       |> assign(:text, "")
       |> start_async(:text_completion, fn ->
         {time, result} = :timer.tc(Nx.Serving, :batched_run, [ZephyrModel, content])
+        Enum.each(result, fn value ->
+          send(lv_pid, {:streamed, value})
+        end)
         in_ms = time / 1_000
         Logger.info("LLM Server: generated response in #{inspect(in_ms)} msec")
-        %{results: [%{text: text}]} = result
+        # %{results: [%{text: text}]} = result
 
-        {:zephyr_result, text, in_ms}
+        {:zephyr_result, "", in_ms}
       end)
 
     {:noreply, socket}
