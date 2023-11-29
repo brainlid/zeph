@@ -36,6 +36,7 @@ defmodule Zeph.MixProject do
       {:phoenix_html, "~> 3.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.20.1"},
+      {:phoenix_ecto, ">= 0.0.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.0"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
@@ -46,9 +47,12 @@ defmodule Zeph.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
+      {:earmark, "~> 1.4"},
       {:plug_cowboy, "~> 2.5"},
       {:bumblebee, github: "elixir-nx/bumblebee"},
-      {:exla, ">= 0.0.0"}
+      {:exla, ">= 0.0.0"},
+      # enable clustering
+      {:dns_cluster, "~> 0.1.1"}
       ]
   end
 

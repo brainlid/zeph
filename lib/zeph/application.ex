@@ -12,6 +12,8 @@ defmodule Zeph.Application do
       ZephWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Zeph.PubSub},
+      # Start DNS Cluster
+      {DNSCluster, query: Application.get_env(:zeph, :dns_cluster_query) || :ignore},
       # Start Finch
       {Finch, name: Zeph.Finch},
       # Start the Endpoint (http/https)
