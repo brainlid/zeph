@@ -31,7 +31,4 @@ defmodule Zeph.Zephyr do
       # preallocate_params: true
     )
   end
-
-  # serving = Zeph.Zephyr.serving()
-  # Nx.Serving.run(serving, "[inst]Who is the POTUS?[/inst]")
 end
