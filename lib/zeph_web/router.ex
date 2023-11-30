@@ -21,6 +21,7 @@ defmodule ZephWeb.Router do
     pipe_through :browser
 
     live "/text", TextCompletionLive.Index, :index
+    live "/chat", ChatConversationLive.Show, :show
 
     get "/", PageController, :home
   end

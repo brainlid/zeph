@@ -51,6 +51,8 @@ defmodule Zeph.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:bumblebee, github: "elixir-nx/bumblebee"},
       {:exla, ">= 0.0.0"},
+      # Use dev branch with initial support working
+      {:langchain, github: "brainlid/langchain", branch: "me-zephyr-chat-model"},
       # enable clustering
       {:dns_cluster, "~> 0.1.1"}
       ]

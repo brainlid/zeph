@@ -26,7 +26,8 @@ defmodule Zeph.Zephyr do
 
     Bumblebee.Text.generation(model_info, tokenizer, generation_config,
       compile: [batch_size: 1, sequence_length: 1028],
-      stream: true,
+      # stream: true,
+      stream: false,
       defn_options: [compiler: EXLA, lazy_transfers: :never]
       # preallocate_params: true
     )
