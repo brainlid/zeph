@@ -19,7 +19,9 @@ defmodule Zeph.Application do
       # Start the Endpoint (http/https)
       ZephWeb.Endpoint,
       # Start the Zephyr Bumblebee model
-      {Nx.Serving, name: ZephyrModel, serving: Zeph.Zephyr.serving()}
+      # {Nx.Serving, name: ZephyrModel, serving: Zeph.Zephyr.serving()},
+      # Start the MistralInstruct Bumblebee model
+      {Nx.Serving, name: MistralInstructModel, serving: Zeph.MistralInstruct.serving()},
       # Start a worker by calling: Zeph.Worker.start_link(arg)
       # {Zeph.Worker, arg}
     ]

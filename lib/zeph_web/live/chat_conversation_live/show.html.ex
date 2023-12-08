@@ -5,6 +5,7 @@ defmodule ZephWeb.ChatConversationLive.Show do
   # alias LangChain.ChatModels.ChatOpenAI
   alias LangChain.Chains.LLMChain
   alias Phoenix.LiveView.AsyncResult
+  alias LangChain.ChatModels.ChatBumbleModel
 
   # what doesn't work:
   # - varied output. The seed is set when the serving is created. https://github.com/elixir-nx/bumblebee/issues/284
@@ -186,11 +187,19 @@ defmodule ZephWeb.ChatConversationLive.Show do
     llm_chain =
       LLMChain.new!(%{
         llm:
-          ChatZephyr.new!(%{
-            serving: ZephyrModel,
+          ChatBumbleModel.new!(%{
+            serving: MistralInstructModel,
+            # serving: ZephyrModel,
+            template_format: :inst,
+            supports_functions: false,
             receive_timeout: 60_000 * 2,
             stream: true
           }),
+        # ChatZephyr.new!(%{
+        #   serving: ZephyrModel,
+        #   receive_timeout: 60_000 * 2,
+        #   stream: true
+        # }),
         verbose: false
       })
       |> LLMChain.add_messages(messages)
